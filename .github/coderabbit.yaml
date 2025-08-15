@@ -1,0 +1,21 @@
+# .github/coderabbit.yaml
+
+# Ignore certain paths from review
+path_filters:
+  - "!**/.venv/**"
+  - "!**/__pycache__/**"
+  - "!**/.pytest_cache/**"
+  - "!**/dist/**"
+  - "!**/build/**"
+  - "!**/*.egg-info/**"
+
+# Provide specific instructions for Python files
+file_path_instructions:
+  - path: "**/*.py"
+    instructions: |
+      Please review this Python code for the following:
+      1.  **Best Practices**: Adherence to PEP 8 and common Python idioms.
+      2.  **Clarity and Readability**: Is the code easy to understand and maintain?
+      3.  **Error Handling**: Are there any unhandled exceptions or potential bugs?
+      4.  **Performance**: Are there any obvious performance bottlenecks?
+      5.  **Docstrings and Typing**: Ensure functions have clear docstrings and type hints are used correctly.

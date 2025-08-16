@@ -168,12 +168,22 @@ class StructMeta(type):
         if Annotated is not None:
             for field_name, field_type in cls_any._types.items():
                 if get_origin(field_type) is Annotated:
-                    args = get_args(field_type)
-                    if len(args) > 1:
-                        # Store metadata (everything after the first arg which is the actual type)
-                        cls_any._field_metadata[field_name] = args[1:]
-                        # Update _types to use the actual type without Annotated wrapper
-                        cls_any._types[field_name] = args[0]
+                    if sys.version_info < (3, 9):
+                        # For Python 3.8 and typing_extensions.Annotated
+                        # The metadata is typically in __metadata__ and the type in __args__[0]
+                        if hasattr(field_type, '__metadata__') and field_type.__metadata__:
+                            cls_any._field_metadata[field_name] = field_type.__metadata__
+                        # __args__ contains the original type and then the metadata
+                        if hasattr(field_type, '__args__') and field_type.__args__:
+                            cls_any._types[field_name] = field_type.__args__[0]
+                    else:
+                        # For Python 3.9+ with native Annotated or typing_extensions.Annotated
+                        args = get_args(field_type)
+                        if len(args) > 1:
+                            # Store metadata (everything after the first arg which is the actual type)
+                            cls_any._field_metadata[field_name] = args[1:]
+                            # Update _types to use the actual type without Annotated wrapper
+                            cls_any._types[field_name] = args[0]
 
         return cls
 

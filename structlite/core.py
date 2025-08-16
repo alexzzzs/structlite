@@ -206,14 +206,14 @@ class Struct(metaclass=StructMeta):
         self, *args: Any, frozen: Optional[bool] = None, **kwargs: Any
     ) -> None:
         """Initialize a new struct instance."""
-        total_fields = len(self._fields) # type: ignore
+        total_fields = len(self._fields)  # type: ignore
 
         # Check for invalid keyword arguments
-        invalid_fields = [k for k in kwargs if k not in self._fields] # type: ignore
+        invalid_fields = [k for k in kwargs if k not in self._fields]  # type: ignore
         if invalid_fields:
             raise TypeError(
                 f"Invalid field(s) for {self.__class__.__name__}: {', '.join(invalid_fields)}. "  # noqa: E501
-                f"Valid fields are: {', '.join(self._fields)}." # type: ignore
+                f"Valid fields are: {', '.join(self._fields)}."  # type: ignore
             )
 
         # Check the total number of arguments
@@ -221,13 +221,13 @@ class Struct(metaclass=StructMeta):
             raise TypeError(
                 f"Too many arguments for {self.__class__.__name__}. "
                 f"Expected at most {total_fields}, got {len(args) + len(kwargs)}. "  # noqa: E501
-                f"Fields: {', '.join(self._fields)}." # type: ignore
+                f"Fields: {', '.join(self._fields)}."  # type: ignore
             )
 
         assigned_fields: set[str] = set()
 
         # Positional arguments
-        for name, value in zip(self._fields, args): # type: ignore
+        for name, value in zip(self._fields, args):  # type: ignore
             self._validate_and_set(name, value, initial_set=True)
             assigned_fields.add(name)
 
@@ -242,16 +242,16 @@ class Struct(metaclass=StructMeta):
             assigned_fields.add(name)
 
         # Default values for any remaining fields
-        for name in self._fields: # type: ignore
+        for name in self._fields:  # type: ignore
             if name not in assigned_fields:
-                if name in self._defaults: # type: ignore
-                    default = self._defaults[name] # type: ignore
+                if name in self._defaults:  # type: ignore
+                    default = self._defaults[name]  # type: ignore
                     value = default() if callable(default) else default
                     self._validate_and_set(name, value, initial_set=True)
                 else:
                     raise TypeError(
                         f"Missing required field '{name}' for {self.__class__.__name__}. "  # noqa: E501
-                        f"Fields: {', '.join(self._fields)}." # type: ignore
+                        f"Fields: {', '.join(self._fields)}."  # type: ignore
                     )
 
         # Set frozen status
@@ -314,19 +314,19 @@ class Struct(metaclass=StructMeta):
             )
 
         # Apply transformers first
-        if name in self._transformers: # type: ignore
-            for t_func in self._transformers[name]: # type: ignore
+        if name in self._transformers:  # type: ignore
+            for t_func in self._transformers[name]:  # type: ignore
                 result = t_func(self, value)
                 if result is not None:
                     value = result
 
         # Type checking
-        expected = self._types.get(name) # type: ignore
+        expected = self._types.get(name)  # type: ignore
         self._validate_type(name, value, expected)
 
         # Field Validators - handle both transforming and non-transforming validators
-        if name in self._validators: # type: ignore
-            for v_func in self._validators[name]: # type: ignore
+        if name in self._validators:  # type: ignore
+            for v_func in self._validators[name]:  # type: ignore
                 result = v_func(self, value)
                 # If validator returns a value, use it (transformation)
                 # If it returns None, keep original value (validation only)
@@ -343,8 +343,8 @@ class Struct(metaclass=StructMeta):
         self._validate_and_set(name, value, initial_set)
 
         # Then run async validators
-        if name in self._async_validators: # type: ignore
-            for av_func in self._async_validators[name]: # type: ignore
+        if name in self._async_validators:  # type: ignore
+            for av_func in self._async_validators[name]:  # type: ignore
                 result = await av_func(self, getattr(self, name))
                 # If async validator returns a value, use it
                 if result is not None:
@@ -352,10 +352,10 @@ class Struct(metaclass=StructMeta):
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Set attribute with validation and frozen check."""
-        if name not in self._fields: # type: ignore
+        if name not in self._fields:  # type: ignore
             raise AttributeError(
                 f"'{self.__class__.__name__}' has no field '{name}'. "
-                f"Valid fields are: {', '.join(self._fields)}." # type: ignore
+                f"Valid fields are: {', '.join(self._fields)}."  # type: ignore
             )
         self._validate_and_set(name, value)
 
@@ -364,14 +364,14 @@ class Struct(metaclass=StructMeta):
         """Check equality by comparing all field values."""
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return all(getattr(self, f) == getattr(other, f) for f in self._fields) # type: ignore
+        return all(getattr(self, f) == getattr(other, f) for f in self._fields)  # type: ignore
 
     def __lt__(self, other: "Struct") -> bool:
         """Compare structs lexicographically by field values."""
         if not isinstance(other, self.__class__):
             return NotImplemented
         # Avoid creating tuples for better performance - compare field by field
-        for field in self._fields: # type: ignore
+        for field in self._fields:  # type: ignore
             self_val = getattr(self, field)
             other_val = getattr(other, field)
             if self_val < other_val:
@@ -383,15 +383,15 @@ class Struct(metaclass=StructMeta):
     # --- Hashing ---
     def __hash__(self) -> int:
         """Return hash of struct. Only available for frozen instances."""
-        if not self._frozen: # type: ignore
+        if not self._frozen:  # type: ignore
             raise TypeError(f"Mutable '{self.__class__.__name__}' is unhashable")
-        return hash(tuple(getattr(self, f) for f in self._fields)) # type: ignore
+        return hash(tuple(getattr(self, f) for f in self._fields))  # type: ignore
 
     # --- Serialization ---
     def to_dict(self, recursive: bool = True) -> Dict[str, Any]:
         """Convert the struct to a dictionary."""
         d = {}
-        for name in self._fields: # type: ignore
+        for name in self._fields:  # type: ignore
             value = getattr(self, name)
             if recursive:
                 if isinstance(value, Struct):
@@ -417,11 +417,11 @@ class Struct(metaclass=StructMeta):
 
         processed_data = {}
         for name, value in data.items():
-            if name not in cls._types: # type: ignore
+            if name not in cls._types:  # type: ignore
                 processed_data[name] = value
                 continue
 
-            field_type = cls._types[name] # type: ignore
+            field_type = cls._types[name]  # type: ignore
             origin = get_origin(field_type)
             args = get_args(field_type)
 
@@ -467,7 +467,7 @@ class Struct(metaclass=StructMeta):
     # --- Copying ---
     def copy(self, **changes: Any) -> "Struct":
         """Return a shallow copy of the struct, optionally with field changes."""
-        values = {f: getattr(self, f) for f in self._fields} # type: ignore
+        values = {f: getattr(self, f) for f in self._fields}  # type: ignore
         values.update(changes)
         return self.__class__(**values)
 
@@ -475,18 +475,18 @@ class Struct(metaclass=StructMeta):
         """Integration with Python's copy.deepcopy()."""
         new_obj = self.__class__.__new__(self.__class__)
         memo[id(self)] = new_obj
-        for name in self._fields: # type: ignore
+        for name in self._fields:  # type: ignore
             value = getattr(self, name)
             setattr(new_obj, name, copy.deepcopy(value, memo))
 
         # Important: also copy the _frozen state
-        super(Struct, new_obj).__setattr__("_frozen", self._frozen) # type: ignore
+        super(Struct, new_obj).__setattr__("_frozen", self._frozen)  # type: ignore
         return new_obj
 
     # --- String Representation ---
     def __repr__(self) -> str:
         """Return a detailed string representation of the struct."""
-        fields_str = ", ".join(f"{f}={getattr(self, f)!r}" for f in self._fields) # type: ignore
+        fields_str = ", ".join(f"{f}={getattr(self, f)!r}" for f in self._fields)  # type: ignore
         return f"{self.__class__.__name__}({fields_str})"
 
     def __str__(self) -> str:
@@ -497,12 +497,12 @@ class Struct(metaclass=StructMeta):
     @classmethod
     def get_field_metadata(cls, field_name: str) -> tuple:
         """Get metadata for a specific field from Annotated type hints."""
-        return cls._field_metadata.get(field_name, ()) # type: ignore
+        return cls._field_metadata.get(field_name, ())  # type: ignore
 
     @classmethod
     def get_all_field_metadata(cls) -> Dict[str, tuple]:
         """Get metadata for all fields."""
-        return cls._field_metadata.copy() # type: ignore
+        return cls._field_metadata.copy()  # type: ignore
 
     # --- NEW: Builder Pattern Support ---
     @classmethod
@@ -518,14 +518,14 @@ class Struct(metaclass=StructMeta):
         instance = cls.__new__(cls)
 
         # Initialize without async validation first
-        total_fields = len(instance._fields) # type: ignore
+        total_fields = len(instance._fields)  # type: ignore
 
         # Check for invalid keyword arguments
-        invalid_fields = [k for k in kwargs if k not in instance._fields] # type: ignore
+        invalid_fields = [k for k in kwargs if k not in instance._fields]  # type: ignore
         if invalid_fields:
             raise TypeError(
                 f"Invalid field(s) for {cls.__name__}: {', '.join(invalid_fields)}. "  # noqa: E501
-                f"Valid fields are: {', '.join(instance._fields)}." # type: ignore
+                f"Valid fields are: {', '.join(instance._fields)}."  # type: ignore
             )
 
         # Check the total number of arguments
@@ -533,13 +533,13 @@ class Struct(metaclass=StructMeta):
             raise TypeError(
                 f"Too many arguments for {cls.__name__}. "
                 f"Expected at most {total_fields}, got {len(args) + len(kwargs)}. "  # noqa: E501
-                f"Fields: {', '.join(instance._fields)}." # type: ignore
+                f"Fields: {', '.join(instance._fields)}."  # type: ignore
             )
 
         assigned_fields: set[str] = set()
 
         # Positional arguments
-        for name, value in zip(instance._fields, args): # type: ignore
+        for name, value in zip(instance._fields, args):  # type: ignore
             instance._validate_and_set(name, value, initial_set=True)
             assigned_fields.add(name)
 
@@ -554,16 +554,16 @@ class Struct(metaclass=StructMeta):
             assigned_fields.add(name)
 
         # Default values for any remaining fields
-        for name in instance._fields: # type: ignore
+        for name in instance._fields:  # type: ignore
             if name not in assigned_fields:
-                if name in instance._defaults: # type: ignore
-                    default = instance._defaults[name] # type: ignore
+                if name in instance._defaults:  # type: ignore
+                    default = instance._defaults[name]  # type: ignore
                     value = default() if callable(default) else default
                     instance._validate_and_set(name, value, initial_set=True)
                 else:
                     raise TypeError(
                         f"Missing required field '{name}' for {cls.__name__}. "  # noqa: E501
-                        f"Fields: {', '.join(instance._fields)}." # type: ignore
+                        f"Fields: {', '.join(instance._fields)}."  # type: ignore
                     )
 
         # Set frozen status
@@ -571,8 +571,8 @@ class Struct(metaclass=StructMeta):
         super(Struct, instance).__setattr__("_frozen", frozen)
 
         # Now run async validation for all fields
-        for field_name in instance._fields: # type: ignore
-            if field_name in instance._async_validators: # type: ignore
+        for field_name in instance._fields:  # type: ignore
+            if field_name in instance._async_validators:  # type: ignore
                 await instance._validate_and_set_async(
                     field_name, getattr(instance, field_name), initial_set=True
                 )
@@ -582,15 +582,15 @@ class Struct(metaclass=StructMeta):
     # --- Additional Utility Methods ---
     def get_field_names(self) -> List[str]:
         """Get list of all field names for this struct."""
-        return list(self._fields) # type: ignore
+        return list(self._fields)  # type: ignore
 
     def get_field_values(self) -> List[Any]:
         """Get list of all field values for this struct."""
-        return [getattr(self, f) for f in self._fields] # type: ignore
+        return [getattr(self, f) for f in self._fields]  # type: ignore
 
     def get_field_items(self) -> List[tuple]:
         """Get list of (field_name, value) tuples."""
-        return [(f, getattr(self, f)) for f in self._fields] # type: ignore
+        return [(f, getattr(self, f)) for f in self._fields]  # type: ignore
 
     def replace(self, **changes: Any) -> "Struct":
         """Create a new instance with specified field changes (alias for copy)."""
@@ -606,7 +606,7 @@ class Struct(metaclass=StructMeta):
             data = dict(row)
         else:  # Sequence (tuple, list)
             # Assume columns are in field order
-            data = dict(zip(cls._fields, row)) # type: ignore
+            data = dict(zip(cls._fields, row))  # type: ignore
 
         # Apply column mapping if provided
         if column_mapping:
@@ -616,7 +616,7 @@ class Struct(metaclass=StructMeta):
                     mapped_data[field_name] = data[db_col]
             # Add unmapped fields
             for key, value in data.items():
-                if key not in column_mapping and key in cls._fields: # type: ignore
+                if key not in column_mapping and key in cls._fields:  # type: ignore
                     mapped_data[key] = value
             data = mapped_data
 
@@ -627,7 +627,7 @@ class Struct(metaclass=StructMeta):
     ) -> tuple:
         """Generate SQL INSERT statement and values."""
         exclude_fields = exclude_fields or []
-        fields = [f for f in self._fields if f not in exclude_fields] # type: ignore
+        fields = [f for f in self._fields if f not in exclude_fields]  # type: ignore
         values = [getattr(self, f) for f in fields]
 
         placeholders = ", ".join(["?" for _ in fields])
@@ -646,7 +646,7 @@ class Struct(metaclass=StructMeta):
         exclude_fields = exclude_fields or []
         exclude_fields.append(where_field)  # Don't update the WHERE field
 
-        update_fields = [f for f in self._fields if f not in exclude_fields] # type: ignore
+        update_fields = [f for f in self._fields if f not in exclude_fields]  # type: ignore
         update_values = [getattr(self, f) for f in update_fields]
         where_value = getattr(self, where_field)
 

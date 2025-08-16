@@ -32,7 +32,9 @@ classifiers = [
     "Typing :: Typed",
 ]
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+    "typing-extensions>=3.7.4; python_version<'3.9'"
+]
 
 [project.optional-dependencies]
 dev = [
@@ -110,3 +112,4 @@ python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

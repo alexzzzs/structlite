@@ -1,8 +1,8 @@
 import asyncio
 import copy
+import sys
 from functools import total_ordering
 from typing import (
-    Annotated,
     Any,
     Callable,
     Dict,
@@ -14,6 +14,16 @@ from typing import (
     get_origin,
     get_type_hints,
 )
+
+# Python 3.8 compatibility
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    try:
+        from typing_extensions import Annotated
+    except ImportError:
+        # Fallback for environments without typing_extensions
+        Annotated = None
 
 
 # structlite.py
@@ -151,15 +161,16 @@ class StructMeta(type):
         # Use include_extras=True to handle Annotated types for metadata
         cls_any._types = get_type_hints(cls, include_extras=True)
 
-        # Extract field metadata from Annotated types
-        for field_name, field_type in cls_any._types.items():
-            if get_origin(field_type) is Annotated:
-                args = get_args(field_type)
-                if len(args) > 1:
-                    # Store metadata (everything after the first arg which is the actual type)
-                    cls_any._field_metadata[field_name] = args[1:]
-                    # Update _types to use the actual type without Annotated wrapper
-                    cls_any._types[field_name] = args[0]
+        # Extract field metadata from Annotated types (if available)
+        if Annotated is not None:
+            for field_name, field_type in cls_any._types.items():
+                if get_origin(field_type) is Annotated:
+                    args = get_args(field_type)
+                    if len(args) > 1:
+                        # Store metadata (everything after the first arg which is the actual type)
+                        cls_any._field_metadata[field_name] = args[1:]
+                        # Update _types to use the actual type without Annotated wrapper
+                        cls_any._types[field_name] = args[0]
 
         return cls
 

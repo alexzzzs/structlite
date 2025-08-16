@@ -1,8 +1,18 @@
 """Basic tests for structlite functionality."""
 
-from typing import Annotated, List
+import sys
+from typing import List
 
 import pytest
+
+# Python 3.8 compatibility
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    try:
+        from typing_extensions import Annotated
+    except ImportError:
+        Annotated = None
 
 from structlite import Struct, immutable, transformer, validator
 
@@ -156,6 +166,8 @@ class TestBasicFunctionality:
 
     def test_metadata(self):
         """Test field metadata with Annotated types."""
+        if Annotated is None:
+            pytest.skip("Annotated not available in Python 3.8 without typing_extensions")
 
         class Product(Struct):
             name: Annotated[str, {"min_length": 1}, "Product name"]

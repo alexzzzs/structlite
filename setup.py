@@ -54,7 +54,7 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        # No external dependencies - pure Python!
+        "typing-extensions>=3.7.4; python_version<'3.9'"
     ],
     extras_require={
         "dev": [

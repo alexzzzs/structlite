@@ -170,11 +170,11 @@ class StructMeta(type):
                 if get_origin(field_type) is Annotated:
                     if sys.version_info < (3, 9):
                         # For Python 3.8 and typing_extensions.Annotated
-                        # The metadata is typically in __metadata__ and the type in __args__[0]
-                        if hasattr(field_type, '__metadata__') and field_type.__metadata__:
-                            cls_any._field_metadata[field_name] = field_type.__metadata__
-                        # __args__ contains the original type and then the metadata
-                        if hasattr(field_type, '__args__') and field_type.__args__:
+                        # In this case, field_type.__args__ contains (type, metadata1, metadata2, ...)
+                        if hasattr(field_type, '__args__') and len(field_type.__args__) > 1:
+                            # The metadata is everything after the first element in __args__
+                            cls_any._field_metadata[field_name] = field_type.__args__[1:]
+                            # The actual type is the first element in __args__
                             cls_any._types[field_name] = field_type.__args__[0]
                     else:
                         # For Python 3.9+ with native Annotated or typing_extensions.Annotated

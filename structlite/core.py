@@ -3,6 +3,7 @@ import copy
 import sys
 from functools import total_ordering
 from typing import (
+    Annotated,
     Any,
     Callable,
     Dict,
@@ -13,7 +14,6 @@ from typing import (
     get_args,
     get_origin,
     get_type_hints,
-    Annotated,
 )
 
 

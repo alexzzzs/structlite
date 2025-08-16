@@ -159,8 +159,12 @@ class StructMeta(type):
         cls_any._field_metadata = {}
 
         # Use include_extras=True to handle Annotated types for metadata (Python 3.9+)
-        if sys.version_info >= (3, 9):
-            cls_any._types = get_type_hints(cls, include_extras=True)
+        # or if typing_extensions provides it (for Python 3.8)
+        if Annotated is not None: # Check if Annotated is even available
+            try:
+                cls_any._types = get_type_hints(cls, include_extras=True)
+            except TypeError: # Fallback for older typing_extensions or Python versions that don't support include_extras
+                cls_any._types = get_type_hints(cls)
         else:
             cls_any._types = get_type_hints(cls)
 

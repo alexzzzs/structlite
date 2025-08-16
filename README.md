@@ -1,7 +1,7 @@
 # StructLite 🚀
 
 [![PyPI version](https://badge.fury.io/py/structlite.svg)](https://badge.fury.io/py/structlite)
-[![Python versions](https://img.shields.io/pypi/pyversions/structlite.svg)](https://pypi.org/project/structlite/)
+[![Python versions](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/yourusername/structlite/workflows/Tests/badge.svg)](https://github.com/yourusername/structlite/actions)
 

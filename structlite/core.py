@@ -13,17 +13,8 @@ from typing import (
     get_args,
     get_origin,
     get_type_hints,
+    Annotated,
 )
-
-# Python 3.8 compatibility
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    try:
-        from typing_extensions import Annotated
-    except ImportError:
-        # Fallback for environments without typing_extensions
-        Annotated = None
 
 
 # structlite.py
@@ -158,36 +149,18 @@ class StructMeta(type):
         cls_any._types = {}
         cls_any._field_metadata = {}
 
-        # Use include_extras=True to handle Annotated types for metadata (Python 3.9+)
-        # or if typing_extensions provides it (for Python 3.8)
-        if Annotated is not None: # Check if Annotated is even available
-            try:
-                cls_any._types = get_type_hints(cls, include_extras=True)
-            except TypeError: # Fallback for older typing_extensions or Python versions that don't support include_extras
-                cls_any._types = get_type_hints(cls)
-        else:
-            cls_any._types = get_type_hints(cls)
+        cls_any._types = get_type_hints(cls, include_extras=True)
 
         # Extract field metadata from Annotated types (if available)
         if Annotated is not None:
             for field_name, field_type in cls_any._types.items():
                 if get_origin(field_type) is Annotated:
-                    if sys.version_info < (3, 9):
-                        # For Python 3.8 and typing_extensions.Annotated
-                        # In this case, field_type.__args__ contains (type, metadata1, metadata2, ...)
-                        if hasattr(field_type, '__args__') and len(field_type.__args__) > 1:
-                            # The metadata is everything after the first element in __args__
-                            cls_any._field_metadata[field_name] = field_type.__args__[1:]
-                            # The actual type is the first element in __args__
-                            cls_any._types[field_name] = field_type.__args__[0]
-                    else:
-                        # For Python 3.9+ with native Annotated or typing_extensions.Annotated
-                        args = get_args(field_type)
-                        if len(args) > 1:
-                            # Store metadata (everything after the first arg which is the actual type)
-                            cls_any._field_metadata[field_name] = args[1:]
-                            # Update _types to use the actual type without Annotated wrapper
-                            cls_any._types[field_name] = args[0]
+                    args = get_args(field_type)
+                    if len(args) > 1:
+                        # Store metadata (everything after the first arg which is the actual type)
+                        cls_any._field_metadata[field_name] = args[1:]
+                        # Update _types to use the actual type without Annotated wrapper
+                        cls_any._types[field_name] = args[0]
 
         return cls
 

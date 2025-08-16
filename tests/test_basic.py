@@ -167,7 +167,9 @@ class TestBasicFunctionality:
     def test_metadata(self):
         """Test field metadata with Annotated types."""
         if Annotated is None:
-            pytest.skip("Annotated not available in Python 3.8 without typing_extensions")
+            pytest.skip(
+                "Annotated not available in Python 3.8 without typing_extensions"
+            )
 
         class Product(Struct):
             name: Annotated[str, {"min_length": 1}, "Product name"]

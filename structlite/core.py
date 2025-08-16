@@ -202,7 +202,9 @@ class StructBuilder:
 class Struct(metaclass=StructMeta):
     # All attributes are set by the metaclass
 
-    def __init__(self, *args: Any, frozen: Optional[bool] = None, **kwargs: Any) -> None:
+    def __init__(
+        self, *args: Any, frozen: Optional[bool] = None, **kwargs: Any
+    ) -> None:
         """Initialize a new struct instance."""
         total_fields = len(self._fields)
 
